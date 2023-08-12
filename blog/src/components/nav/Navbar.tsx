@@ -15,7 +15,7 @@ const Navbar = () => {
   }
   return (
     <Fragment>
-      <button onClick={openNavbar}>
+      <button className="absolute" onClick={openNavbar}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -33,7 +33,7 @@ const Navbar = () => {
       </button>
       <nav
         ref={nav}
-        className="md:hidden w-70 xsm:w-80 bg-white px-5 py-3 fixed bottom-0 top-0 border-l-0 border-b-0 border-solid border-4 border-gold transition duration-500 ease-out "
+        className="md:hidden w-70 xsm:w-80 bg-white px-5 py-3 fixed bottom-0 top-0 border-l-0 border-b-0 border-solid border-4 border-gold transition duration-500 ease-out z-999"
         style={{ transform: navOpened ? "translate(0)" : "translate(-100%)" }}
       >
         <svg
@@ -64,13 +64,13 @@ const Navbar = () => {
         </ul>
       </nav>
 
-      <nav className="w-full hidden md:block  bg-black px-12 py-6 fixed">
+      <nav className="w-full hidden md:block  bg-black px-12 py-6 sticky top-0 z-999">
         <ul className="flex justify-between items-center font-sans">
           <div className="flex gap-5 items-center ">
-            <li className=" text-sm transition duration-300 text-white cursor-pointer hover:scale-125 ">
+            <li className=" text-sm transition duration-300 text-white cursor-pointer hover:-translate-y-1 ">
               Home
             </li>
-            <li className=" text-sm transition duration-300 text-white cursor-pointer hover:scale-125 ">
+            <li className=" text-sm transition duration-300 text-white cursor-pointer hover:-translate-y-1 ">
               Contact
             </li>
           </div>

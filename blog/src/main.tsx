@@ -6,11 +6,11 @@ import Home from "./pages/Home";
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "/MyBlog",
     element: <Root />,
     children: [
       {
-        path: "/",
+        path: "/MyBlog",
         element: <Home />,
       },
     ],

@@ -3,7 +3,7 @@ import libraryImg from "../../images/library.svg";
 
 const HeroSection = () => {
   return (
-    <section className="flow-root px-5">
+    <section className="flow-root px-5 pb-9 lg:px-8">
       <header className="flex items-center mt-12  flex-col  relative z-30 ">
         <h1 className="text-white font-serif text-2xl font-bold sm:text-5xl lg:text-5xl">
           Welcome to my blog

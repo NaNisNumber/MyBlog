@@ -18,6 +18,7 @@ export default {
         purple: "#5a2685",
         darkPurple: "#3a243b",
         darkBrown: "#642F12",
+        lightBlue: "#88B0B3",
       },
       zIndex: {
         999: "999",

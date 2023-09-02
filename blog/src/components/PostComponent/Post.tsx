@@ -1,6 +1,30 @@
-import PotatoAuthor from "../../images/potato.jpeg";
 import Rectangle from "../../images/rectangle.png";
-const Post = () => {
+import { Link } from "react-router-dom";
+interface Props {
+  postData: {
+    authorImg: string;
+    authorName: string;
+    postImage: string;
+    textBlock: string;
+    title: string;
+    _createdAt: string;
+    _id: string;
+  };
+}
+
+const Post = (props: Props) => {
+  const authorImg = props.postData.authorImg;
+  const authorName = props.postData.authorName;
+  const postImage = props.postData.postImage;
+  const title = props.postData.title;
+  const createdAt = props.postData._createdAt;
+  const date = new Date(createdAt);
+  const postId = props.postData._id;
+  const day = date.getDate();
+  const month = date.toLocaleString("en-US", { month: "short" });
+  const year = date.getFullYear();
+  const fullDate = `${day} ${month} ${year}`;
+
   function displayPostEyeHandler(e: React.MouseEvent<HTMLDivElement>) {
     const target: HTMLElement = e.currentTarget as HTMLElement;
     const postId = target.dataset.postId;
@@ -18,24 +42,28 @@ const Post = () => {
   }
 
   return (
-    <div className="w-4/5 m-auto font-sans grid gap-6 md:grid-cols-2 lg:grid-cols-3 lg:w-full">
-      <div>
-        <div className="flex justify-between text-white w-[95%] m-auto mb-2">
-          <div className="flex items-center gap-2">
-            <p>Author</p>
-            <img className="w-6 h-6 rounded-full" src={PotatoAuthor} />
-          </div>
-          <p>date</p>
+    <div>
+      <div className="flex justify-between text-white w-[95%] m-auto mb-2">
+        <div className="flex items-center gap-2">
+          <p>{authorName}</p>
+          <img className="w-6 h-6 rounded-full" src={authorImg} />
         </div>
+        <p>{fullDate}</p>
+      </div>
+      <Link to={`/MyBlog/post/${postId}`}>
         <div
-          data-post-id="0"
+          data-post-id={`${postId}`}
           onMouseLeave={(e) => {
             hidePostEyeHandler(e);
           }}
           onMouseEnter={(e) => {
             displayPostEyeHandler(e);
           }}
-          className="bg-white w-full h-40 md:h-52 post__img relative py-2 cursor-pointer"
+          className="bg-white w-full h-40 md:h-52  relative py-2 cursor-pointer"
+          style={{
+            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.3)), url(${postImage})`,
+            backgroundPosition: "35% 35%",
+          }}
         >
           <img className="absolute right-0 bottom-0" src={Rectangle} />
           <svg
@@ -44,7 +72,7 @@ const Post = () => {
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke=""
-            data-post-svg-id="0"
+            data-post-svg-id={`${postId}`}
             className="stroke-white bg-gold bg-opacity-50 px-2 py-2 rounded-full w-16 h-16 absolute top-2/4 left-2/4 -translate-x-2/4 ease-in duration-200 opacity-0"
           >
             <path
@@ -74,11 +102,9 @@ const Post = () => {
             />
           </svg>
 
-          <p className="text-white font-sans text-base text-center">
-            Some things about minecraft minecraftminecraft
-          </p>
+          <p className="text-white font-sans text-base text-center">{title}</p>
         </div>
-      </div>
+      </Link>
     </div>
   );
 };

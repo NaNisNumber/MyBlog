@@ -1,18 +1,68 @@
-import { useRef } from "react";
-import { searchCriteriaData } from "./searchCriteriaData";
+import { useRef, useState, useEffect } from "react";
 import PostFilterItemsBtn from "../buttons/PostFilterItemsBtn/PostFilterItemsBtn";
-
+import { createClient } from "@sanity/client";
+import { ReactElement } from "react";
 interface Props {
+  category: string;
+  setCategory: React.Dispatch<React.SetStateAction<string>>;
   isDragging: boolean;
   setIsDragging: React.Dispatch<React.SetStateAction<boolean>>;
 }
+interface categories {
+  title: string;
+}
 
-const TabsSelection = ({ isDragging, setIsDragging }: Props) => {
-  const filterTabsContainer = useRef<HTMLElement>(null);
-  const searchCriterionBtns = searchCriteriaData.map((criterionObj, i) => {
-    const criterionName: string = criterionObj.criterionName;
-    return <PostFilterItemsBtn key={i} criterionName={criterionName} />;
+const TabsSelection = ({
+  isDragging,
+  setIsDragging,
+  category,
+  setCategory,
+}: Props) => {
+  const [categories, setCategories] = useState<categories[]>([]);
+  const client = createClient({
+    projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
+    dataset: "production",
+    useCdn: true, // set to `false` to bypass the edge cache
+    apiVersion: "2023-08-19", // use current date (YYYY-MM-DD) to target the latest API version
+    // token: process.env.SANITY_SECRET_TOKEN // Only if you want to update content with the client
   });
+
+  // uses GROQ to query content: https://www.sanity.io/docs/groq
+
+  // query for categories
+
+  useEffect(() => {
+    async function getCategories() {
+      const categories = await client.fetch('*[_type == "category"]{title}');
+      return categories;
+    }
+
+    getCategories().then((categories) => {
+      setCategories(categories);
+    });
+  }, []);
+
+  const filterTabsContainer = useRef<HTMLElement>(null);
+
+  interface searchCriterionBtns {
+    title: string;
+  }
+
+  const searchCriterionBtns: ReactElement[] = categories.map(
+    (criterionObj, i) => {
+      const criterionName: string = criterionObj.title;
+
+      return (
+        <PostFilterItemsBtn
+          category={category}
+          setCategory={setCategory}
+          dataCategory={criterionName}
+          key={i}
+          criterionName={criterionName}
+        />
+      );
+    }
+  );
 
   function slideToLeft(event: React.MouseEvent<HTMLButtonElement>) {
     if (!filterTabsContainer.current) return;

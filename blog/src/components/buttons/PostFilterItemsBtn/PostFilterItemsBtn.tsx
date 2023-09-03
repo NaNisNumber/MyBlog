@@ -1,5 +1,11 @@
 import React from "react";
 interface Props {
+  setFrom: React.Dispatch<React.SetStateAction<number>>;
+  setTo: React.Dispatch<React.SetStateAction<number>>;
+  postRequestLimit: number;
+  setCurrentPageId: React.Dispatch<React.SetStateAction<number>>;
+  setPageDirection: React.Dispatch<React.SetStateAction<string>>;
+  setReachedEnd: React.Dispatch<React.SetStateAction<boolean>>;
   category: string;
   setCategory: React.Dispatch<React.SetStateAction<string>>;
   criterionName: string;
@@ -7,6 +13,12 @@ interface Props {
 }
 
 const PostFilterItemsBtn = ({
+  setFrom,
+  setTo,
+  postRequestLimit,
+  setCurrentPageId,
+  setPageDirection,
+  setReachedEnd,
   criterionName,
   dataCategory,
   category,
@@ -41,12 +53,22 @@ const PostFilterItemsBtn = ({
 
     if (category === definedCategory) {
       setCategory("");
+      setFrom(0);
+      setTo(postRequestLimit);
+      setCurrentPageId(1);
+      setPageDirection("");
+      setReachedEnd(false);
       // back to initial styles of category btn
       currentTarget.classList.remove("bg-darkPurple", "text-white");
       currentTarget.classList.add("bg-gold", "text-darkPurple");
       return;
     } else {
       setCategory(definedCategory);
+      setFrom(0);
+      setTo(postRequestLimit);
+      setCurrentPageId(1);
+      setPageDirection("");
+      setReachedEnd(false);
     }
   }
 

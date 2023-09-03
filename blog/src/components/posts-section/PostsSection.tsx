@@ -14,8 +14,8 @@ const PostsSection = () => {
   const [from, setFrom] = useState<number>(0);
   const [to, setTo] = useState<number>(postRequestLimit);
   const [reachedEnd, setReachedEnd] = useState<boolean>(false);
-  const [currentPageId, setCurrentPageId] = useState<number | string>(1);
-  const [pageDirection, setPageDirection] = useState<string>();
+  const [currentPageId, setCurrentPageId] = useState<number>(1);
+  const [pageDirection, setPageDirection] = useState<string>("");
   const client = createClient({
     projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
     dataset: "production",
@@ -41,7 +41,7 @@ const PostsSection = () => {
     'postImage':mainImage.asset->.url,
     _createdAt,
     _id
-  }`
+  }[0...${postRequestLimit}]`
       );
       return posts;
     }
@@ -100,6 +100,17 @@ const PostsSection = () => {
   }
 
   useEffect(() => {
+    function verifyAndSet(posts: []) {
+      if (pageDirection === "next" && posts.length > 0) {
+        setCurrentPageId((prevPageId) => +prevPageId + 1);
+      }
+      if (posts.length === 0) {
+        setReachedEnd(true);
+        return;
+      }
+      setPosts(posts);
+    }
+
     async function getPosts() {
       const posts = await client.fetch(
         `*[_type == 'post'][${from}...${to}]` +
@@ -117,16 +128,33 @@ const PostsSection = () => {
       return posts;
     }
 
-    getPosts().then((posts) => {
-      if (pageDirection === "next" && posts.length > 0) {
-        setCurrentPageId((prevPageId) => +prevPageId + 1);
-      }
-      if (posts.length === 0) {
-        setReachedEnd(true);
-        return;
-      }
-      setPosts(posts);
-    });
+    async function getPostsByCategory() {
+      const posts = await client.fetch(
+        `*[_type == 'post' && references('${category}')]` +
+          `{
+    'authorImg': author->image.asset->.url,
+    'authorName': author->name,
+    'textBlock': body[0].children[0].text,
+    title,
+    'postImage':mainImage.asset->.url,
+    _createdAt,
+    _id
+  }[${from}...${to}]`
+      );
+
+      return posts;
+    }
+    if (!category) {
+      getPosts().then((posts) => {
+        verifyAndSet(posts);
+      });
+    }
+
+    if (category) {
+      getPostsByCategory().then((posts) => {
+        verifyAndSet(posts);
+      });
+    }
   }, [from, to]);
 
   const postElements = posts.map((postData, i) => {
@@ -144,6 +172,12 @@ const PostsSection = () => {
         <div className="flex flex-col gap-4 items-center sm:max-w-[80%] md:max-w-[50%] m-auto overflow-hidden mb-6">
           <Searchbar />
           <TabsSelection
+            setFrom={setFrom}
+            setTo={setTo}
+            postRequestLimit={postRequestLimit}
+            setCurrentPageId={setCurrentPageId}
+            setPageDirection={setPageDirection}
+            setReachedEnd={setReachedEnd}
             category={category}
             setCategory={setCategory}
             isDragging={isDragging}

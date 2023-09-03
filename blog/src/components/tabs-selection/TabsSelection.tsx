@@ -3,6 +3,12 @@ import PostFilterItemsBtn from "../buttons/PostFilterItemsBtn/PostFilterItemsBtn
 import { createClient } from "@sanity/client";
 import { ReactElement } from "react";
 interface Props {
+  setFrom: React.Dispatch<React.SetStateAction<number>>;
+  setTo: React.Dispatch<React.SetStateAction<number>>;
+  postRequestLimit: number;
+  setCurrentPageId: React.Dispatch<React.SetStateAction<number>>;
+  setPageDirection: React.Dispatch<React.SetStateAction<string>>;
+  setReachedEnd: React.Dispatch<React.SetStateAction<boolean>>;
   category: string;
   setCategory: React.Dispatch<React.SetStateAction<string>>;
   isDragging: boolean;
@@ -13,6 +19,12 @@ interface categories {
 }
 
 const TabsSelection = ({
+  setFrom,
+  setTo,
+  postRequestLimit,
+  setCurrentPageId,
+  setPageDirection,
+  setReachedEnd,
   isDragging,
   setIsDragging,
   category,
@@ -54,6 +66,12 @@ const TabsSelection = ({
 
       return (
         <PostFilterItemsBtn
+          setFrom={setFrom}
+          setTo={setTo}
+          postRequestLimit={postRequestLimit}
+          setCurrentPageId={setCurrentPageId}
+          setPageDirection={setPageDirection}
+          setReachedEnd={setReachedEnd}
           category={category}
           setCategory={setCategory}
           dataCategory={criterionName}

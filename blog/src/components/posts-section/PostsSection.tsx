@@ -84,12 +84,24 @@ const PostsSection = () => {
       if (from === 0 && to === postRequestLimit) return;
 
       if (reachedEnd) {
-        setFrom((prevFrom) => prevFrom - 2 * postRequestLimit);
-        setTo((prevTo) => prevTo - 2 * postRequestLimit);
-        setCurrentPageId((prevPageId) => +prevPageId - 1);
+        /* in this case if from is === 3 and to === 6 and you reached the end you will go back to the initial page */
+        if (from === postRequestLimit && to === postRequestLimit * 2) {
+          setFrom(0);
+          setTo(postRequestLimit);
+          setReachedEnd(false);
+        } else {
+          /* in this case if from is anything but the limit and to is anything but postRequestLimit * 2
+           and you reached the end you will go back one page.
+           For example if the last page that has posts have the from===9 and to===12 and you go to 12 / 15 
+           and there are no more posts that means you reached the end. When you go prev => reachedEnd===true
+           => we extract from the "from" and "to" going back to 6 / 9 which is the page before the one we see at the reached end.
+           */
+          setFrom((prevFrom) => prevFrom - 2 * postRequestLimit);
+          setTo((prevTo) => prevTo - 2 * postRequestLimit);
+          setCurrentPageId((prevPageId) => +prevPageId - 1);
+          setReachedEnd(false);
+        }
       }
-
-      setReachedEnd(false);
 
       if (!reachedEnd) {
         setFrom((prevFrom) => prevFrom - postRequestLimit);

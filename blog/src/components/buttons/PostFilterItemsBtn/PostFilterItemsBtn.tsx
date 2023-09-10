@@ -1,28 +1,16 @@
 import React from "react";
 interface Props {
-  setFrom: React.Dispatch<React.SetStateAction<number>>;
-  setTo: React.Dispatch<React.SetStateAction<number>>;
-  postRequestLimit: number;
-  setCurrentPageId: React.Dispatch<React.SetStateAction<number>>;
-  setPageDirection: React.Dispatch<React.SetStateAction<string>>;
-  setReachedEnd: React.Dispatch<React.SetStateAction<boolean>>;
+  resetPage(category: string): void;
   category: string;
-  setCategory: React.Dispatch<React.SetStateAction<string>>;
   criterionName: string;
   dataCategory: string;
 }
 
 const PostFilterItemsBtn = ({
-  setFrom,
-  setTo,
-  postRequestLimit,
-  setCurrentPageId,
-  setPageDirection,
-  setReachedEnd,
+  resetPage,
   criterionName,
   dataCategory,
   category,
-  setCategory,
 }: Props) => {
   function applyCurrentBtnStyle(
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -52,23 +40,13 @@ const PostFilterItemsBtn = ({
     if (!definedCategory) return;
 
     if (category === definedCategory) {
-      setCategory("");
-      setFrom(0);
-      setTo(postRequestLimit);
-      setCurrentPageId(1);
-      setPageDirection("");
-      setReachedEnd(false);
+      resetPage("");
       // back to initial styles of category btn
       currentTarget.classList.remove("bg-darkPurple", "text-white");
       currentTarget.classList.add("bg-gold", "text-darkPurple");
       return;
     } else {
-      setCategory(definedCategory);
-      setFrom(0);
-      setTo(postRequestLimit);
-      setCurrentPageId(1);
-      setPageDirection("");
-      setReachedEnd(false);
+      resetPage(definedCategory);
     }
   }
 

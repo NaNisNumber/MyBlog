@@ -16,6 +16,7 @@ const PostsSection = () => {
   const [reachedEnd, setReachedEnd] = useState<boolean>(false);
   const [currentPageId, setCurrentPageId] = useState<number>(1);
   const [pageDirection, setPageDirection] = useState<string>("");
+  const [orderType, setOrderType] = useState<string>(`desc`);
   const client = createClient({
     projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
     dataset: "production",
@@ -27,12 +28,20 @@ const PostsSection = () => {
   // uses GROQ to query content: https://www.sanity.io/docs/groq
 
   // query for posts based on category
+  function resetPage(category: string) {
+    setCategory(category);
+    setFrom(0);
+    setTo(postRequestLimit);
+    setCurrentPageId(1);
+    setPageDirection("");
+    setReachedEnd(false);
+  }
 
   useEffect(() => {
     if (!category) return;
     async function getPosts() {
       const posts = await client.fetch(
-        `*[_type == 'post' && references('${category}')]` +
+        `*[_type == 'post' && references('${category}')] | order(_createdAt ${orderType})` +
           `{
     'authorImg': author->image.asset->.url,
     'authorName': author->name,
@@ -53,9 +62,10 @@ const PostsSection = () => {
 
   useEffect(() => {
     if (category) return;
+
     async function getPosts() {
       const initialPosts = await client.fetch(
-        `*[_type == 'post']` +
+        `*[_type == 'post'] | order(_createdAt desc)` +
           `{
     'authorImg': author->image.asset->.url,
     'authorName': author->name,
@@ -125,7 +135,7 @@ const PostsSection = () => {
 
     async function getPosts() {
       const posts = await client.fetch(
-        `*[_type == 'post'][${from}...${to}]` +
+        `*[_type == 'post']| order(_createdAt ${orderType})[${from}...${to}]` +
           `{
     'authorImg': author->image.asset->.url,
     'authorName': author->name,
@@ -142,7 +152,7 @@ const PostsSection = () => {
 
     async function getPostsByCategory() {
       const posts = await client.fetch(
-        `*[_type == 'post' && references('${category}')]` +
+        `*[_type == 'post' && references('${category}')] | order(_createdAt ${orderType})[${from}...${to}]` +
           `{
     'authorImg': author->image.asset->.url,
     'authorName': author->name,
@@ -151,7 +161,7 @@ const PostsSection = () => {
     'postImage':mainImage.asset->.url,
     _createdAt,
     _id
-  }[${from}...${to}]`
+  }`
       );
 
       return posts;
@@ -167,7 +177,7 @@ const PostsSection = () => {
         verifyAndSet(posts);
       });
     }
-  }, [from, to]);
+  }, [from, to, orderType]);
 
   const postElements = posts.map((postData, i) => {
     return <Post key={i} postData={postData} />;
@@ -184,6 +194,7 @@ const PostsSection = () => {
         <div className="flex flex-col gap-4 items-center sm:max-w-[80%] md:max-w-[50%] m-auto overflow-hidden mb-6">
           <Searchbar />
           <TabsSelection
+            resetPage={resetPage}
             setFrom={setFrom}
             setTo={setTo}
             postRequestLimit={postRequestLimit}
@@ -195,7 +206,12 @@ const PostsSection = () => {
             isDragging={isDragging}
             setIsDragging={setIsDragging}
           />
-          <SelectFromDate />
+          <SelectFromDate
+            resetPage={resetPage}
+            category={category}
+            orderType={orderType}
+            setOrderType={setOrderType}
+          />
         </div>
         <div className="w-4/5 m-auto font-sans grid gap-6 md:grid-cols-2 lg:grid-cols-3 lg:w-full mb-3">
           {postElements}

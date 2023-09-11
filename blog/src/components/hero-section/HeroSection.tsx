@@ -1,10 +1,10 @@
-import penImg from "../../images/pen.svg";
-import libraryImg from "../../images/library.svg";
+import penImg from "../../images/pen.png";
+import libraryImg from "../../images/library.png";
 
 const HeroSection = () => {
   return (
     <section className="flow-root px-5 pb-9 lg:px-8">
-      <header className="flex items-center mt-12  flex-col  relative z-30 ">
+      <header className="flex items-center flex-col translate-y-2/3  relative z-30 ">
         <h1 className="text-white font-serif text-2xl font-bold sm:text-5xl lg:text-5xl">
           Welcome to my blog
         </h1>
@@ -19,6 +19,7 @@ const HeroSection = () => {
           {/* <div className="absolute w-full h-full bg-gold top-0 left-0 -z-10 -rotate-3 px-6 py-1 box-content"></div> */}
         </span>
       </p>
+
       <div className="grid grid-cols-2 justify-items-center gap-6 w-4/5 lg:w-3/5 m-0-auto">
         <div className="relative w-full">
           <img

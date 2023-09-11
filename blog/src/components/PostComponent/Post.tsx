@@ -89,10 +89,10 @@ const Post = (props: Props) => {
 
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            fill="#F92222"
+            fill="#fff"
             viewBox="0 0 24 24"
             strokeWidth={1.5}
-            stroke="#F92222"
+            stroke="#fff"
             className="w-6 h-6 absolute right-0 bottom-0 translate-y-[-25%]"
           >
             <path

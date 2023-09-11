@@ -3,7 +3,7 @@ import libraryImg from "../../images/library.png";
 
 const HeroSection = () => {
   return (
-    <section className="flow-root px-5 pb-9 lg:px-8">
+    <section className="flow-root pt-9 md:pt-0 px-5 pb-9 lg:px-8">
       <header className="flex items-center flex-col translate-y-2/3  relative z-30 ">
         <h1 className="text-white font-serif text-2xl font-bold sm:text-5xl lg:text-5xl">
           Welcome to my blog
@@ -11,7 +11,7 @@ const HeroSection = () => {
       </header>
       <p
         style={{ lineHeight: "1.5" }}
-        className="text-white font-serif translate-y-2/3 text-xl font-bold text-center tracking-wide sm:text-3xl lg:text-5xl opacity-90 relative z-40"
+        className="text-white font-serif translate-y-2/3  font-bold text-center tracking-wide  xsm:text-lg sm:text-3xl lg:text-5xl opacity-90 relative z-40"
       >
         Here you can find usefull stuff<br></br> about{" "}
         <span className="relative px-3 py-1 before:-z-10 before:block before:absolute before:-inset-0  lg:before:-inset-1  before:-skew-y-3 before:bg-gold">

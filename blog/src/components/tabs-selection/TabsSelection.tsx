@@ -83,17 +83,17 @@ const TabsSelection = ({
     filterTabsContainer.current.scrollLeft -= event.movementX - 90;
   }
 
-  function draggingOnTouch(event: React.PointerEvent<HTMLDivElement>) {
-    if (!filterTabsContainer.current) return;
-    if (event.pointerType === "touch") {
-      filterTabsContainer.current.style.scrollBehavior = "smooth";
-      if (event.movementX > 0) {
-        filterTabsContainer.current.scrollLeft -= event.movementX + 80;
-      } else {
-        filterTabsContainer.current.scrollLeft -= event.movementX - 80;
-      }
-    }
-  }
+  // function draggingOnTouch(event: React.PointerEvent<HTMLDivElement>) {
+  //   if (!filterTabsContainer.current) return;
+  //   if (event.pointerType === "touch") {
+  //     filterTabsContainer.current.style.scrollBehavior = "smooth";
+  //     if (event.movementX > 0) {
+  //       filterTabsContainer.current.scrollLeft -= event.movementX + 80;
+  //     } else {
+  //       filterTabsContainer.current.scrollLeft -= event.movementX - 80;
+  //     }
+  //   }
+  // }
 
   function draggingWithMouse(event: React.PointerEvent<HTMLDivElement>) {
     /*
@@ -132,7 +132,7 @@ const TabsSelection = ({
   }
 
   function draggingHandler(e: React.PointerEvent<HTMLDivElement>) {
-    draggingOnTouch(e);
+    // draggingOnTouch(e);
     draggingWithMouse(e);
   }
 

@@ -4,6 +4,8 @@ interface Props {
   category: string;
   criterionName: string;
   dataCategory: string;
+  tracerOldValue: number;
+  tracerNewValue: number;
 }
 
 const PostFilterItemsBtn = ({
@@ -11,6 +13,8 @@ const PostFilterItemsBtn = ({
   criterionName,
   dataCategory,
   category,
+  tracerOldValue,
+  tracerNewValue,
 }: Props) => {
   function applyCurrentBtnStyle(
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -34,6 +38,8 @@ const PostFilterItemsBtn = ({
   function getCurrentBtnCategory(
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) {
+    if (tracerOldValue != tracerNewValue) return;
+
     const currentTarget: HTMLButtonElement = e.currentTarget;
     const definedCategory: string | undefined = currentTarget.dataset.category;
     applyCurrentBtnStyle(e);
@@ -54,8 +60,10 @@ const PostFilterItemsBtn = ({
     <React.Fragment>
       <button
         data-category={dataCategory}
-        onClick={(e) => getCurrentBtnCategory(e)}
-        className="category__btn bg-gold   whitespace-nowrap font-semibold text-base text-darkPurple cursor-[inherit] px-4 py-0"
+        onClick={(e) => {
+          getCurrentBtnCategory(e);
+        }}
+        className="category__btn bg-gold  whitespace-nowrap font-semibold text-base text-darkPurple cursor-[inherit] px-4 py-0"
       >
         {criterionName}
       </button>

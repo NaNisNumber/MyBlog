@@ -26,6 +26,8 @@ const TabsSelection = ({
   category,
 }: Props) => {
   const [categories, setCategories] = useState<categories[]>([]);
+  const [tracerOldValue, setTracerOldValue] = useState<number>(0);
+  const [tracerNewValue, setTracerNewValue] = useState<number>(0);
   const client = createClient({
     projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
     dataset: "production",
@@ -51,10 +53,6 @@ const TabsSelection = ({
 
   const filterTabsContainer = useRef<HTMLElement>(null);
 
-  interface searchCriterionBtns {
-    title: string;
-  }
-
   const searchCriterionBtns: ReactElement[] = categories.map(
     (criterionObj, i) => {
       const criterionName: string = criterionObj.title;
@@ -66,6 +64,8 @@ const TabsSelection = ({
           dataCategory={criterionName}
           key={i}
           criterionName={criterionName}
+          tracerOldValue={tracerOldValue}
+          tracerNewValue={tracerNewValue}
         />
       );
     }
@@ -85,10 +85,9 @@ const TabsSelection = ({
 
   function draggingOnTouch(event: React.PointerEvent<HTMLDivElement>) {
     if (!filterTabsContainer.current) return;
-
     if (event.pointerType === "touch") {
       filterTabsContainer.current.style.scrollBehavior = "smooth";
-      if (event.movementX >= 0) {
+      if (event.movementX > 0) {
         filterTabsContainer.current.scrollLeft -= event.movementX + 80;
       } else {
         filterTabsContainer.current.scrollLeft -= event.movementX - 80;
@@ -97,6 +96,34 @@ const TabsSelection = ({
   }
 
   function draggingWithMouse(event: React.PointerEvent<HTMLDivElement>) {
+    /*
+  THE PROBLEM: 
+    when you drag the slider tabs, you also click a tab button that will trigger the handler after you release the click
+
+  HOW IT SHOULD ACTUALLY WORK: 
+    when you are dragging and you also hold or click a button, after you stop dragging that button should not trigger,
+    unless it is triggered while the tabs are not dragged which means that the mouse should be on a steady and 
+    non draggable position;
+
+  WHAT I TRIED TO SOLVE IT:
+    1.I tried to get the value of scrollLeft in real time and set it in a state every time the value changes.
+    and if it changes that means the tabs div is being dragged => the button that was pressed at the same time while dragging
+    should be innactive.
+    This solved the problem but it is not the best way in terms of performance because there are a lot of changes in state
+    while dragging.
+
+    2.I tried to check if isDragging===true when onMouseDown was triggered and if it was true the buttons shouldn't work.
+    But the problem in that was that when onMouseUp triggered isDragging===false => the buttons become active again and when
+    the onClick function triggers at last it find that the isDragging is always false and the button will get active anyway.
+
+   HOW I FINALLY SOLVED IT:
+      I saved the initial value from scrollLeft with the onMouseDown event and I saved it as the old value, also the 
+      end of the scrolling value from scrollLeft with the onMouseUp event. Those two values got saved in two different states
+      then I received them as props in the PostFilterItemsBtn and on the onClick event I checked if those values were distinct
+      and if they were that means the tabs container moved => the handler from onClick should not trigger.
+      If you try to click once on a tab button without dragging the tabs container then the values will be the same and that means
+      the container didn't move at all => the handler function from the onClick event will trigger.
+  */
     if (!filterTabsContainer.current) return;
     if (event.pointerType === "mouse" && isDragging) {
       filterTabsContainer.current.style.scrollBehavior = "auto";
@@ -133,10 +160,13 @@ const TabsSelection = ({
           setIsDragging(true);
           if (!filterTabsContainer.current) return;
           filterTabsContainer.current.style.cursor = "grabbing";
+          setTracerOldValue(filterTabsContainer.current.scrollLeft);
         }}
         onMouseUp={() => {
+          setIsDragging(false);
           if (!filterTabsContainer.current) return;
           filterTabsContainer.current.style.cursor = "grab";
+          setTracerNewValue(filterTabsContainer.current.scrollLeft);
         }}
         ref={filterTabsContainer as React.RefObject<HTMLDivElement>}
         className="flex gap-1 overflow-hidden"

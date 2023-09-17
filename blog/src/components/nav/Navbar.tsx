@@ -1,10 +1,19 @@
-import { Fragment, useRef, useState } from "react";
+import { Fragment, useRef, useState, useEffect } from "react";
 import LogInBtn from "../account/log-in/LogInBtn";
 import RegisterBtn from "../account/register/RegisterBtn";
-// import LogOutBtn from "../account/log-out/LogOutBtn";
+import UserPanelBtn from "../authentication/UserPanelBtn";
+import UserPanel from "../authentication/UserPanel";
+import { AuthenticationForm } from "../authentication/AuthenticationForm";
+import { auth } from "../../../firebaseConfig";
+import { onAuthStateChanged } from "firebase/auth";
+import { useToggle } from "@mantine/hooks";
 
 const Navbar = () => {
   const [navOpened, setNavOpened] = useState<boolean>(false);
+  const [userIsLogged, setUserIsLogged] = useState(false);
+  const [displayUserPanel, setDisplayUserPanel] = useState(false);
+  const [type, toggle] = useToggle(["login", "register"]);
+  const [displayAuthForm, setDisplayAuthForm] = useState(false);
   const nav = useRef(null);
 
   function openNavbar() {
@@ -13,6 +22,20 @@ const Navbar = () => {
   function closeNavbar() {
     setNavOpened(false);
   }
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is signed in, see docs for a list of available properties
+        // https://firebase.google.com/docs/reference/js/auth.user
+        setUserIsLogged(true);
+      } else {
+        // User is signed out
+
+        setUserIsLogged(false);
+      }
+    });
+  }, []);
+
   return (
     <Fragment>
       <button className="absolute" onClick={openNavbar}>
@@ -33,7 +56,7 @@ const Navbar = () => {
       </button>
       <nav
         ref={nav}
-        className="md:hidden w-70 xsm:w-80 bg-white px-5 py-3 fixed bottom-0 top-0 border-l-0 border-b-0 border-solid border-4 border-gold transition duration-500 ease-out z-999"
+        className="md:hidden w-72 xsm:w-80 bg-white px-5 py-3 fixed bottom-0 top-0 border-l-0 border-b-0 border-solid border-4 border-gold transition duration-500 ease-out z-999"
         style={{ transform: navOpened ? "translate(0)" : "translate(-100%)" }}
       >
         <svg
@@ -53,14 +76,47 @@ const Navbar = () => {
         </svg>
 
         <ul className="flex flex-col justify-between items-center font-sans mt-8">
-          <div className="flex gap-2.5 mb-6">
-            <RegisterBtn />
-            <LogInBtn />
+          <div className="flex justify-center gap-2.5 mb-6 w-full  relative">
+            {!userIsLogged && (
+              <RegisterBtn
+                toggle={toggle}
+                setDisplayAuthForm={setDisplayAuthForm}
+              />
+            )}
+            {!userIsLogged && (
+              <LogInBtn
+                toggle={toggle}
+                setDisplayAuthForm={setDisplayAuthForm}
+              />
+            )}
+            {!userIsLogged && displayAuthForm && (
+              <AuthenticationForm
+                type={type}
+                toggle={toggle}
+                setDisplayAuthForm={setDisplayAuthForm}
+              />
+            )}
+            {userIsLogged && (
+              <UserPanelBtn
+                hoverBgColor={"hover__bg-color-white"}
+                bgColor={"darkPurple"}
+                panelIconStroke={"#3a243b"}
+                displayUserPanel={displayUserPanel}
+                setDisplayUserPanel={setDisplayUserPanel}
+              />
+            )}
+            {userIsLogged && displayUserPanel && (
+              <UserPanel
+                userPanelPositioning={"panel__positioning-mobile"}
+                userPanelWidth={"panel__width-mobile"}
+              />
+            )}
           </div>
-          <div className="flex gap-2 flex-col items-center text-black">
-            <li className=" text-sm ">Home</li>
-            <li className=" text-sm ">Contact</li>
-          </div>
+          {!displayAuthForm && (
+            <div className="flex gap-2 flex-col items-center text-black">
+              <li className=" text-sm ">Home</li>
+            </div>
+          )}
         </ul>
       </nav>
 
@@ -74,9 +130,45 @@ const Navbar = () => {
               Contact
             </li>
           </div>
-          <div className="flex gap-2.5">
-            <RegisterBtn />
-            <LogInBtn />
+          <div
+            className={`flex gap-2.5 relative ${
+              userIsLogged && "w-[7rem]"
+            } justify-center`}
+          >
+            {!userIsLogged && (
+              <RegisterBtn
+                toggle={toggle}
+                setDisplayAuthForm={setDisplayAuthForm}
+              />
+            )}
+            {!userIsLogged && (
+              <LogInBtn
+                toggle={toggle}
+                setDisplayAuthForm={setDisplayAuthForm}
+              />
+            )}
+            {!userIsLogged && displayAuthForm && (
+              <AuthenticationForm
+                type={type}
+                toggle={toggle}
+                setDisplayAuthForm={setDisplayAuthForm}
+              />
+            )}
+            {userIsLogged && (
+              <UserPanelBtn
+                hoverBgColor={"hover__bg-color-white"}
+                bgColor={"black"}
+                panelIconStroke={"black"}
+                displayUserPanel={displayUserPanel}
+                setDisplayUserPanel={setDisplayUserPanel}
+              />
+            )}
+            {userIsLogged && displayUserPanel && (
+              <UserPanel
+                userPanelPositioning={"panel__positioning-desktop"}
+                userPanelWidth={"panel__width-desktop"}
+              />
+            )}
           </div>
         </ul>
       </nav>

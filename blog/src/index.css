@@ -131,3 +131,25 @@ table {
   background-color: blueviolet;
   color: #fff;
 }
+
+.hover__bg-color-white:hover {
+  background-color: white;
+}
+.panel__width-desktop {
+  /* width: 7rem; */
+}
+.panel__width-mobile {
+  width: 7rem;
+}
+.panel__positioning-mobile {
+  position: absolute;
+  bottom: -0.5rem;
+  transform: translate(0, 100%);
+}
+.panel__positioning-desktop {
+  position: absolute;
+  right: 0;
+  left: 0;
+  bottom: -0.5rem;
+  transform: translate(calc(0%), 100%);
+}

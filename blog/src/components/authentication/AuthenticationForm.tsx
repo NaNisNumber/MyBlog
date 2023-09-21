@@ -14,6 +14,10 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { auth } from "../../../firebaseConfig";
+import "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
+import { app } from "../../../firebaseConfig";
 // import { GoogleButton, TwitterButton } from "../SocialButtons/SocialButtons";
 interface Props {
   type: string;
@@ -26,6 +30,7 @@ export function AuthenticationForm({
   setDisplayAuthForm,
   ...props
 }: Props & PaperProps) {
+  const db = getFirestore(app);
   const form = useForm({
     initialValues: {
       email: "",
@@ -43,6 +48,15 @@ export function AuthenticationForm({
     },
   });
 
+  async function addUserToDb(uid: string, username: string) {
+    try {
+      await setDoc(doc(db, "users", uid), {
+        userName: username,
+      });
+    } catch (e) {
+      console.error("Error adding document: ", e);
+    }
+  }
   // createUserWithEmailAndPassword(auth, email, password).then(
   //   (userCredential) => {
   //     // Signed in
@@ -87,6 +101,7 @@ export function AuthenticationForm({
 
         <form
           onSubmit={form.onSubmit(() => {
+            const userName: string = form.values.name;
             const email: string = form.values.email;
             const password: string = form.values.password;
             if (type === "register") {
@@ -94,8 +109,8 @@ export function AuthenticationForm({
                 (userCredential) => {
                   // Signed in
                   const user = userCredential.user;
-                  console.log(user);
-                  // ...
+                  const uid: string = user.uid;
+                  addUserToDb(uid, userName);
                 }
               );
             } else if (type === "login") {

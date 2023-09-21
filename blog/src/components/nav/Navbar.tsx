@@ -4,8 +4,10 @@ import RegisterBtn from "../account/register/RegisterBtn";
 import UserPanelBtn from "../authentication/UserPanelBtn";
 import UserPanel from "../authentication/UserPanel";
 import { AuthenticationForm } from "../authentication/AuthenticationForm";
-import { auth } from "../../../firebaseConfig";
+import { auth, app } from "../../../firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { useToggle } from "@mantine/hooks";
 
 const Navbar = () => {
@@ -15,6 +17,16 @@ const Navbar = () => {
   const [type, toggle] = useToggle(["login", "register"]);
   const [displayAuthForm, setDisplayAuthForm] = useState(false);
   const nav = useRef(null);
+  const [userData, setUserData] = useState<UserData>({
+    userId: "",
+    userName: "",
+  });
+  const db = getFirestore(app);
+
+  interface UserData {
+    userId: string;
+    userName: string;
+  }
 
   function openNavbar() {
     setNavOpened(true);
@@ -28,6 +40,10 @@ const Navbar = () => {
         // User is signed in, see docs for a list of available properties
         // https://firebase.google.com/docs/reference/js/auth.user
         setUserIsLogged(true);
+        const uid: string = user.uid;
+        setUserData((prevUserData) => {
+          return { ...prevUserData, userId: uid };
+        });
       } else {
         // User is signed out
 
@@ -35,6 +51,26 @@ const Navbar = () => {
       }
     });
   }, []);
+
+  useEffect(() => {
+    if (!userIsLogged) return;
+    async function getUserDataFromDb() {
+      const docRef = doc(db, "users", userData.userId);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const userData = docSnap.data();
+        const userName = userData.userName;
+
+        setUserData((prevUserData) => {
+          return { ...prevUserData, userName };
+        });
+      } else {
+        console.log("No such document!");
+      }
+    }
+    getUserDataFromDb();
+  }, [userIsLogged]);
 
   return (
     <Fragment>
@@ -109,6 +145,7 @@ const Navbar = () => {
               <UserPanel
                 userPanelPositioning={"panel__positioning-mobile"}
                 userPanelWidth={"panel__width-mobile"}
+                userData={userData}
               />
             )}
           </div>
@@ -167,6 +204,7 @@ const Navbar = () => {
               <UserPanel
                 userPanelPositioning={"panel__positioning-desktop"}
                 userPanelWidth={"panel__width-desktop"}
+                userData={userData}
               />
             )}
           </div>

@@ -9,6 +9,7 @@ export default {
         neg4: "-4px",
         "0-auto": "0 auto",
         "8%": "8%",
+        fitContent: "fit-content",
       },
       colors: {
         black: "#000",

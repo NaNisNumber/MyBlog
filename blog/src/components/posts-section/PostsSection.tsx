@@ -65,7 +65,7 @@ const PostsSection = () => {
 
     async function getPosts() {
       const initialPosts = await client.fetch(
-        `*[_type == 'post'] | order(_createdAt desc)` +
+        `*[_type == 'post'] | order(_createdAt ${orderType})` +
           `{
     'authorImg': author->image.asset->.url,
     'authorName': author->name,

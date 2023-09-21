@@ -135,11 +135,9 @@ table {
 .hover__bg-color-white:hover {
   background-color: white;
 }
-.panel__width-desktop {
-  /* width: 7rem; */
-}
+
 .panel__width-mobile {
-  width: 7rem;
+  min-width: 7rem;
 }
 .panel__positioning-mobile {
   position: absolute;

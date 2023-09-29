@@ -97,7 +97,7 @@ const FavoritePosts = () => {
   });
 
   return (
-    <section className="px-5 pb-9 md:py-5 lg:px-8">
+    <section className="px-5 pb-9 py-5 lg:px-8">
       <div className="w-4/5 m-auto font-sans grid gap-6 md:grid-cols-2 lg:grid-cols-3 lg:w-full mb-3">
         {postElements}
       </div>

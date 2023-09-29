@@ -112,17 +112,16 @@ export function AuthenticationForm({
                   const user = userCredential.user;
                   const uid: string = user.uid;
                   addUserToDb(uid, userName);
+                  setDisplayAuthForm(false);
                 }
               );
             } else if (type === "login") {
-              signInWithEmailAndPassword(auth, email, password).then(
-                (userCredential) => {
-                  // Signed in
-                  const user = userCredential.user;
-                  console.log(user);
-                  // ...
-                }
-              );
+              signInWithEmailAndPassword(auth, email, password).then(() => {
+                // Signed in
+
+                setDisplayAuthForm(false);
+                // ...
+              });
               // .catch((error) => {
               //   const errorCode = error.code;
               //   const errorMessage = error.message;

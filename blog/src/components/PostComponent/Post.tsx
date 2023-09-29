@@ -22,17 +22,6 @@ interface Props {
   userIsLogged: boolean;
 }
 
-/*
-
-1. read the db and set the client to the db but before doing this check if the data from db arrived
-and if data did not then deactivate the ability to add posts to client;
-2. now client and db are synced togheter;
-3. when you try to add new posts to client check if they already exist and not add them if they do.
-4.now if we add posts to the client we can rewrite the db everytime with the posts that are on client
- synchronizing them further.
-
-*/
-
 const Post = (props: Props) => {
   const favoritePosts = props.favoritePosts;
   const [uid, setUid] = useState<string>();
@@ -51,6 +40,7 @@ const Post = (props: Props) => {
   const year = date.getFullYear();
   const fullDate = `${day} ${month} ${year}`;
   const userIsLogged: boolean = props.userIsLogged;
+  const [userAddedPost, setUserAddedPost] = useState<boolean>(false);
   const db = getFirestore(app);
 
   function displayPostEyeHandler(e: React.MouseEvent<HTMLDivElement>) {
@@ -75,6 +65,9 @@ const Post = (props: Props) => {
     if (!userIsLogged) return;
     const parentEl: HTMLElement = e.currentTarget.parentElement as HTMLElement;
     const postId: string = parentEl.dataset.postId as string;
+    if (postId) {
+      setUserAddedPost(true);
+    }
     let postIdExist: boolean = false;
     // check if this postId currently exists in the favoritePosts array and if it exist don't add it
 
@@ -86,9 +79,19 @@ const Post = (props: Props) => {
       });
     } else {
       if (favoritePosts.has(postId)) {
+        // if the post id that we try to add already exist on the list we will filter the list and get rid of it
         postIdExist = true;
+        const remainingFavoritePosts: string[] = [];
+        for (const post of favoritePosts) {
+          if (post != postId) {
+            remainingFavoritePosts.push(post);
+          }
+        }
+        setFavoritePosts(new Set([...remainingFavoritePosts]));
       }
+
       if (!postIdExist) {
+        // and if it does not exist we will add it next to the others
         setFavoritePosts((prevFavPostIds) => {
           const prevPostIds = new Set([...prevFavPostIds]);
           prevPostIds.add(postId);
@@ -111,6 +114,7 @@ const Post = (props: Props) => {
   }, []);
 
   useEffect(() => {
+    // request to db for user fav posts, first time when page loads or on refresh
     if (!uid) return;
     const docRef = doc(db, "users", uid);
     async function getUserData() {
@@ -128,7 +132,9 @@ const Post = (props: Props) => {
 
   useEffect(() => {
     if (!uid) return;
-    if (favoritePosts?.size === 0) return;
+    // if the user didn't start to add any items to the fav list return;
+    // this will prevent db to get rewrote with an empty array when there are still items in db
+    if (!userAddedPost) return;
 
     const docRef = doc(db, "users", uid);
 

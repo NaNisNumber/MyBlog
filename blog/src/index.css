@@ -149,3 +149,19 @@ table {
   bottom: -0.5rem;
   transform: translate(calc(0%), 100%);
 }
+
+.heart__animation {
+  animation: heartAnimation 0.3s;
+}
+
+@keyframes heartAnimation {
+  from {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

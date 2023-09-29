@@ -34,6 +34,7 @@ const PostsSection = ({ favoritePosts, setFavoritePosts }: Props) => {
   const [pageDirection, setPageDirection] = useState<string>("");
   const [orderType, setOrderType] = useState<string>(`desc`);
   const [userIsLogged, setUserIsLogged] = useState<boolean>(false);
+  const [numberOfPosts, setNumberOfPosts] = useState<number>(0);
   const client = createClient({
     projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
     dataset: "production",
@@ -210,7 +211,29 @@ const PostsSection = ({ favoritePosts, setFavoritePosts }: Props) => {
     }
   }, [from, to, orderType]);
 
-  const postElements = posts.map((postData: PostData, i) => {
+  // get total number of posts
+  useEffect(() => {
+    if (category) return;
+    async function getNumberOfPosts() {
+      const numberOfPosts = await client.fetch(`count(*[_type == 'post']) `);
+      setNumberOfPosts(numberOfPosts);
+    }
+    getNumberOfPosts();
+  }, [category]);
+
+  // get number of posts in that category
+  useEffect(() => {
+    if (!category) return;
+    async function getNumberOfPosts() {
+      const numberOfPosts = await client.fetch(
+        `count(*[_type == 'post' && references('${category}')]) `
+      );
+      setNumberOfPosts(numberOfPosts);
+    }
+    getNumberOfPosts();
+  }, [category]);
+
+  const postElements = posts.map((postData: PostData) => {
     postData.isFavorite = false;
     const postId: string = postData["_id"];
     if (!userIsLogged) {
@@ -222,7 +245,7 @@ const PostsSection = ({ favoritePosts, setFavoritePosts }: Props) => {
 
     return (
       <Post
-        key={i}
+        key={postId}
         postData={postData}
         favoritePosts={favoritePosts}
         setFavoritePosts={setFavoritePosts}
@@ -267,6 +290,7 @@ const PostsSection = ({ favoritePosts, setFavoritePosts }: Props) => {
         <Pagination
           currentPageId={currentPageId}
           fetchPageHandler={fetchPageHandler}
+          numberOfPosts={numberOfPosts}
         />
       </section>
     </React.Fragment>

@@ -79,7 +79,7 @@ const FavoritePosts = () => {
     });
   }, [favoritePosts]);
 
-  const postElements = posts.map((postData: PostData, i) => {
+  const postElements = posts.map((postData: PostData) => {
     postData.isFavorite = false;
     const postId: string = postData["_id"];
     if (favoritePosts.has(postId)) {
@@ -87,7 +87,7 @@ const FavoritePosts = () => {
     }
     return (
       <Post
-        key={i}
+        key={postId}
         postData={postData}
         favoritePosts={favoritePosts}
         setFavoritePosts={setFavoritePosts}

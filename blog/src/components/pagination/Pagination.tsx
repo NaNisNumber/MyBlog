@@ -1,9 +1,14 @@
 interface Props {
   fetchPageHandler(page: string): void;
   currentPageId: string | number;
+  numberOfPosts: number;
 }
 
-const Pagination = ({ currentPageId, fetchPageHandler }: Props) => {
+const Pagination = ({
+  currentPageId,
+  fetchPageHandler,
+  numberOfPosts,
+}: Props) => {
   return (
     <div className="flex gap-2 flex-col items-center">
       <div className="text-darkPurple font-semibold flex items-center gap-3 font-sans">
@@ -23,7 +28,7 @@ const Pagination = ({ currentPageId, fetchPageHandler }: Props) => {
           next
         </button>
       </div>
-      <p className="text-white">(total results: 100)</p>
+      <p className="text-white">(total results: {numberOfPosts})</p>
     </div>
   );
 };

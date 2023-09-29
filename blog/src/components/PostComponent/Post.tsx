@@ -64,6 +64,7 @@ const Post = (props: Props) => {
   ) {
     if (!userIsLogged) return;
     const parentEl: HTMLElement = e.currentTarget.parentElement as HTMLElement;
+    const heartSvg: HTMLElement = e.currentTarget.firstChild as HTMLElement;
     const postId: string = parentEl.dataset.postId as string;
     if (postId) {
       setUserAddedPost(true);
@@ -72,6 +73,7 @@ const Post = (props: Props) => {
     // check if this postId currently exists in the favoritePosts array and if it exist don't add it
 
     if (favoritePosts.size === 0) {
+      heartSvg.classList.add("heart__animation");
       setFavoritePosts((prevFavPosts) => {
         const prevFavPosts2 = new Set([...prevFavPosts]);
         prevFavPosts2.add(postId);
@@ -80,7 +82,9 @@ const Post = (props: Props) => {
     } else {
       if (favoritePosts.has(postId)) {
         // if the post id that we try to add already exist on the list we will filter the list and get rid of it
+        heartSvg.classList.remove("heart__animation");
         postIdExist = true;
+
         const remainingFavoritePosts: string[] = [];
         for (const post of favoritePosts) {
           if (post != postId) {
@@ -91,6 +95,7 @@ const Post = (props: Props) => {
       }
 
       if (!postIdExist) {
+        heartSvg.classList.add("heart__animation");
         // and if it does not exist we will add it next to the others
         setFavoritePosts((prevFavPostIds) => {
           const prevPostIds = new Set([...prevFavPostIds]);

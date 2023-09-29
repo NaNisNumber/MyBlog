@@ -16,7 +16,7 @@ const UserPanelBtn = ({
   return (
     <button
       onClick={() => setDisplayUserPanel(!displayUserPanel)}
-      className={`transition ease-out delay-150 bg-${bgColor} p-2 rounded-full shadow ${hoverBgColor} hover:shadow-darkPurple hover:shadow-inner`}
+      className={`transition  ease-out delay-150 bg-${bgColor} p-2 rounded-full shadow ${hoverBgColor} hover:shadow-darkPurple hover:shadow-inner`}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

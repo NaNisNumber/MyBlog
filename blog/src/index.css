@@ -146,8 +146,6 @@ table {
 }
 .panel__positioning-desktop {
   position: absolute;
-  right: 0;
-  left: 0;
   bottom: -0.5rem;
   transform: translate(calc(0%), 100%);
 }

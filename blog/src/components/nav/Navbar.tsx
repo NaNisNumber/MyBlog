@@ -9,8 +9,12 @@ import { onAuthStateChanged } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { doc, getDoc } from "firebase/firestore";
 import { useToggle } from "@mantine/hooks";
+import { Link } from "react-router-dom";
+interface Props {
+  favoritePosts: Set<string>;
+}
 
-const Navbar = () => {
+const Navbar = ({ favoritePosts }: Props) => {
   const [navOpened, setNavOpened] = useState<boolean>(false);
   const [userIsLogged, setUserIsLogged] = useState(false);
   const [displayUserPanel, setDisplayUserPanel] = useState(false);
@@ -20,12 +24,14 @@ const Navbar = () => {
   const [userData, setUserData] = useState<UserData>({
     userId: "",
     userName: "",
+    favPosts: [],
   });
   const db = getFirestore(app);
 
   interface UserData {
     userId: string;
     userName: string;
+    favPosts: string[];
   }
 
   function openNavbar() {
@@ -34,6 +40,7 @@ const Navbar = () => {
   function closeNavbar() {
     setNavOpened(false);
   }
+
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -146,12 +153,15 @@ const Navbar = () => {
                 userPanelPositioning={"panel__positioning-mobile"}
                 userPanelWidth={"panel__width-mobile"}
                 userData={userData}
+                favoritePosts={favoritePosts}
               />
             )}
           </div>
           {!displayAuthForm && (
             <div className="flex gap-2 flex-col items-center text-black">
-              <li className=" text-sm ">Home</li>
+              <Link to={"/MyBlog"}>
+                <li className=" text-sm ">Home</li>
+              </Link>
             </div>
           )}
         </ul>
@@ -160,16 +170,15 @@ const Navbar = () => {
       <nav className="w-full hidden md:block  bg-black px-12 py-6 sticky top-0 z-999">
         <ul className="flex justify-between items-center font-sans">
           <div className="flex gap-5 items-center ">
-            <li className=" text-sm transition duration-300 text-white cursor-pointer hover:-translate-y-1 ">
-              Home
-            </li>
-            <li className=" text-sm transition duration-300 text-white cursor-pointer hover:-translate-y-1 ">
-              Contact
-            </li>
+            <Link to={"/MyBlog"}>
+              <li className=" text-sm transition duration-300 text-white cursor-pointer hover:-translate-y-1 ">
+                Home
+              </li>
+            </Link>
           </div>
           <div
             className={`flex gap-2.5 relative ${
-              userIsLogged && "w-[7rem]"
+              userIsLogged && "w-[12rem]"
             } justify-center`}
           >
             {!userIsLogged && (
@@ -205,6 +214,7 @@ const Navbar = () => {
                 userPanelPositioning={"panel__positioning-desktop"}
                 userPanelWidth={"panel__width-desktop"}
                 userData={userData}
+                favoritePosts={favoritePosts}
               />
             )}
           </div>

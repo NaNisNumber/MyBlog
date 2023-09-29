@@ -52,6 +52,7 @@ export function AuthenticationForm({
     try {
       await setDoc(doc(db, "users", uid), {
         userName: username,
+        favPosts: [],
       });
     } catch (e) {
       console.error("Error adding document: ", e);

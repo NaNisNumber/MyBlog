@@ -5,7 +5,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { MantineProvider } from "@mantine/core";
 import Home from "./pages/Home";
 import ReadPost from "./pages/ReadPost";
-
+import FavoritePosts from "./pages/FavoritePosts";
 const router = createBrowserRouter([
   {
     path: "/MyBlog",
@@ -18,6 +18,10 @@ const router = createBrowserRouter([
       {
         path: "/MyBlog/post/:id",
         element: <ReadPost />,
+      },
+      {
+        path: "/MyBlog/favorite-posts",
+        element: <FavoritePosts />,
       },
     ],
   },

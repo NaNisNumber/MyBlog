@@ -6,7 +6,23 @@ import Searchbar from "../searchbar/Searchbar";
 import TabsSelection from "../tabs-selection/TabsSelection";
 import SelectFromDate from "../select-from-date/SelectFromDate";
 import Post from "../PostComponent/Post";
-const PostsSection = () => {
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../../firebaseConfig";
+interface Props {
+  favoritePosts: Set<string>;
+  setFavoritePosts: React.Dispatch<React.SetStateAction<Set<string>>>;
+}
+interface PostData {
+  authorImg: string;
+  authorName: string;
+  postImage: string;
+  textBlock: string;
+  title: string;
+  _createdAt: string;
+  _id: string;
+  isFavorite: boolean;
+}
+const PostsSection = ({ favoritePosts, setFavoritePosts }: Props) => {
   const postRequestLimit: number = 3;
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [category, setCategory] = useState<string>("");
@@ -17,6 +33,7 @@ const PostsSection = () => {
   const [currentPageId, setCurrentPageId] = useState<number>(1);
   const [pageDirection, setPageDirection] = useState<string>("");
   const [orderType, setOrderType] = useState<string>(`desc`);
+  const [userIsLogged, setUserIsLogged] = useState<boolean>(false);
   const client = createClient({
     projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
     dataset: "production",
@@ -36,6 +53,20 @@ const PostsSection = () => {
     setPageDirection("");
     setReachedEnd(false);
   }
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is signed in, see docs for a list of available properties
+        // https://firebase.google.com/docs/reference/js/auth.user
+        setUserIsLogged(true);
+      } else {
+        // User is signed out
+
+        setUserIsLogged(false);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     if (!category) return;
@@ -179,8 +210,25 @@ const PostsSection = () => {
     }
   }, [from, to, orderType]);
 
-  const postElements = posts.map((postData, i) => {
-    return <Post key={i} postData={postData} />;
+  const postElements = posts.map((postData: PostData, i) => {
+    postData.isFavorite = false;
+    const postId: string = postData["_id"];
+    if (!userIsLogged) {
+      postData.isFavorite = false;
+    }
+    if (favoritePosts.has(postId)) {
+      postData.isFavorite = true;
+    }
+
+    return (
+      <Post
+        key={i}
+        postData={postData}
+        favoritePosts={favoritePosts}
+        setFavoritePosts={setFavoritePosts}
+        userIsLogged={userIsLogged}
+      />
+    );
   });
 
   return (

@@ -8,7 +8,7 @@ const LogOutBtn = () => {
     });
   };
   return (
-    <button onClick={logOut} className="text-white border-none">
+    <button onClick={logOut} className="text-white border-none hover:text-gold">
       Log out
     </button>
   );

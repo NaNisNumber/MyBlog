@@ -1,4 +1,5 @@
 import LogOutBtn from "../account/log-out/LogOutBtn";
+import { Link } from "react-router-dom";
 interface UserData {
   userId: string;
   userName: string;
@@ -7,12 +8,14 @@ interface Props {
   userPanelWidth: string;
   userPanelPositioning: string;
   userData: UserData;
+  favoritePosts: Set<string>;
 }
 
 const UserPanel = ({
   userPanelWidth,
   userPanelPositioning,
   userData,
+  favoritePosts,
 }: Props) => {
   let userName: string = "";
 
@@ -22,10 +25,16 @@ const UserPanel = ({
 
   return (
     <div
-      className={`${userPanelWidth} w-fitContent pt-4 pb-4 pl-2 pr-2 bg-darkPurple ${userPanelPositioning} flex flex-col justify-center gap-2`}
+      className={`${userPanelWidth} w-fitContent py-4 px-8 bg-darkPurple ${userPanelPositioning} flex flex-col justify-center gap-2`}
     >
+      <p className="text-white text-sm">Username: {userName}</p>
+      <Link
+        className="text-white text-sm  hover:text-gold"
+        to={"/MyBlog/favorite-posts"}
+      >
+        Favorite Posts ({favoritePosts.size})
+      </Link>
       <LogOutBtn />
-      <p className="text-white text-sm">username:{userName}</p>
     </div>
   );
 };

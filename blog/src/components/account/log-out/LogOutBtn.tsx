@@ -3,9 +3,7 @@ import { auth } from "../../../../firebaseConfig";
 
 const LogOutBtn = () => {
   const logOut = () => {
-    signOut(auth).then(() => {
-      console.log("logged out");
-    });
+    signOut(auth);
   };
   return (
     <button onClick={logOut} className="text-white border-none hover:text-gold">

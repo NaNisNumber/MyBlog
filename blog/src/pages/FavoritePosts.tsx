@@ -1,7 +1,7 @@
 import { useSetFavoritesPosts } from "../routes/Route";
 import { useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, getFirestore } from "firebase/firestore";
+import { doc, getDoc, updateDoc, getFirestore } from "firebase/firestore";
 import { auth, app } from "../../firebaseConfig";
 import { createClient } from "@sanity/client";
 import Post from "../components/PostComponent/Post";
@@ -19,7 +19,9 @@ interface PostData {
 const FavoritePosts = () => {
   const { favoritePosts, setFavoritePosts } = useSetFavoritesPosts(); // the id's for the posts
   const [posts, setPosts] = useState([]); // the posts that come from sanity based on the id's provided from firebase db
-  const [uid, setUid] = useState<string>();
+  const [uid, setUid] = useState<string | undefined>();
+
+  useState<boolean>(false);
   const db = getFirestore(app);
   const client = createClient({
     projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
@@ -35,16 +37,23 @@ const FavoritePosts = () => {
         // User is signed in, see docs for a list of available properties
         // https://firebase.google.com/docs/reference/js/auth.user
 
-        const uid: string = user.uid;
+        const uid: string | undefined = user.uid;
+
         setUid(uid);
+      }
+      if (!user) {
+        setUid(undefined);
+        setFavoritePosts(new Set());
       }
     });
   }, []);
 
   useEffect(() => {
     if (!uid) return;
+
     if (favoritePosts.size > 0) return;
     const docRef = doc(db, "users", uid);
+
     async function getUserData() {
       const docSnap = await getDoc(docRef);
       let data;
@@ -57,6 +66,18 @@ const FavoritePosts = () => {
     }
     getUserData();
   }, [uid]);
+
+  useEffect(() => {
+    if (!uid) return;
+    const docRef = doc(db, "users", uid);
+
+    async function dbAddPostsToFavorite() {
+      await updateDoc(docRef, {
+        favoritePosts: [...favoritePosts],
+      });
+    }
+    dbAddPostsToFavorite();
+  }, [favoritePosts]);
 
   useEffect(() => {
     async function getPosts() {
@@ -82,16 +103,18 @@ const FavoritePosts = () => {
   const postElements = posts.map((postData: PostData) => {
     postData.isFavorite = false;
     const postId: string = postData["_id"];
+
     if (favoritePosts.has(postId)) {
       postData.isFavorite = true;
     }
+
     return (
       <Post
         key={postId}
         postData={postData}
         favoritePosts={favoritePosts}
         setFavoritePosts={setFavoritePosts}
-        userIsLogged={uid ? true : false}
+        uid={uid}
       />
     );
   });

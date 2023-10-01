@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
+// import { useState } from "react";
 import Rectangle from "../../images/rectangle.png";
 import { Link } from "react-router-dom";
-import { getFirestore } from "firebase/firestore";
-import { auth, app } from "../../../firebaseConfig";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
+// import { getFirestore } from "firebase/firestore";
+// import { app } from "../../../firebaseConfig";
 
 interface Props {
   postData: {
@@ -19,12 +17,13 @@ interface Props {
   };
   favoritePosts: Set<string>;
   setFavoritePosts: React.Dispatch<React.SetStateAction<Set<string>>>;
-  userIsLogged: boolean;
+  uid: string | undefined;
+  setCommittedPostAction?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const Post = (props: Props) => {
   const favoritePosts = props.favoritePosts;
-  const [uid, setUid] = useState<string>();
+  const uid = props.uid;
   const setFavoritePosts: React.Dispatch<React.SetStateAction<Set<string>>> =
     props.setFavoritePosts;
   const authorImg = props.postData.authorImg;
@@ -39,9 +38,7 @@ const Post = (props: Props) => {
   const month = date.toLocaleString("en-US", { month: "short" });
   const year = date.getFullYear();
   const fullDate = `${day} ${month} ${year}`;
-  const userIsLogged: boolean = props.userIsLogged;
-  const [userAddedPost, setUserAddedPost] = useState<boolean>(false);
-  const db = getFirestore(app);
+  const setCommittedPostAction = props.setCommittedPostAction;
 
   function displayPostEyeHandler(e: React.MouseEvent<HTMLDivElement>) {
     const target: HTMLElement = e.currentTarget as HTMLElement;
@@ -62,12 +59,12 @@ const Post = (props: Props) => {
   function clientAddPostsToFavorite(
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) {
-    if (!userIsLogged) return;
+    if (!uid) return;
     const parentEl: HTMLElement = e.currentTarget.parentElement as HTMLElement;
     const heartSvg: HTMLElement = e.currentTarget.firstChild as HTMLElement;
     const postId: string = parentEl.dataset.postId as string;
-    if (postId) {
-      setUserAddedPost(true);
+    if (postId && setCommittedPostAction) {
+      setCommittedPostAction(true);
     }
     let postIdExist: boolean = false;
     // check if this postId currently exists in the favoritePosts array and if it exist don't add it
@@ -105,51 +102,6 @@ const Post = (props: Props) => {
       }
     }
   }
-
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/auth.user
-
-        const uid: string = user.uid;
-        setUid(uid);
-      }
-    });
-  }, []);
-
-  useEffect(() => {
-    // request to db for user fav posts, first time when page loads or on refresh
-    if (!uid) return;
-    const docRef = doc(db, "users", uid);
-    async function getUserData() {
-      const docSnap = await getDoc(docRef);
-      let data;
-      let favPosts: Set<string>;
-      if (docSnap.exists()) {
-        data = docSnap.data();
-        favPosts = new Set(data.favoritePosts);
-        favPosts && setFavoritePosts(favPosts);
-      }
-    }
-    getUserData();
-  }, [uid]);
-
-  useEffect(() => {
-    if (!uid) return;
-    // if the user didn't start to add any items to the fav list return;
-    // this will prevent db to get rewrote with an empty array when there are still items in db
-    if (!userAddedPost) return;
-
-    const docRef = doc(db, "users", uid);
-
-    async function dbAddPostsToFavorite() {
-      await updateDoc(docRef, {
-        favoritePosts: [...favoritePosts],
-      });
-    }
-    dbAddPostsToFavorite();
-  }, [favoritePosts]);
 
   return (
     <div>

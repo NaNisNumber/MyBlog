@@ -7,7 +7,8 @@ import TabsSelection from "../tabs-selection/TabsSelection";
 import SelectFromDate from "../select-from-date/SelectFromDate";
 import Post from "../PostComponent/Post";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../../../firebaseConfig";
+import { getFirestore, doc, updateDoc, getDoc } from "firebase/firestore";
+import { auth, app } from "../../../firebaseConfig";
 interface Props {
   favoritePosts: Set<string>;
   setFavoritePosts: React.Dispatch<React.SetStateAction<Set<string>>>;
@@ -33,8 +34,11 @@ const PostsSection = ({ favoritePosts, setFavoritePosts }: Props) => {
   const [currentPageId, setCurrentPageId] = useState<number>(1);
   const [pageDirection, setPageDirection] = useState<string>("");
   const [orderType, setOrderType] = useState<string>(`desc`);
-  const [userIsLogged, setUserIsLogged] = useState<boolean>(false);
+  const [uid, setUid] = useState<string | undefined>("");
   const [numberOfPosts, setNumberOfPosts] = useState<number>(0);
+  const [committedPostAction, setCommittedPostAction] =
+    useState<boolean>(false);
+  const db = getFirestore(app);
   const client = createClient({
     projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
     dataset: "production",
@@ -57,17 +61,52 @@ const PostsSection = ({ favoritePosts, setFavoritePosts }: Props) => {
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
+      const uid: string | undefined = user?.uid;
       if (user) {
         // User is signed in, see docs for a list of available properties
         // https://firebase.google.com/docs/reference/js/auth.user
-        setUserIsLogged(true);
+
+        setUid(uid);
       } else {
         // User is signed out
 
-        setUserIsLogged(false);
+        setUid(uid);
       }
     });
   }, []);
+
+  useEffect(() => {
+    // request to db for user fav posts, first time when page loads or on refresh
+    if (!uid) return;
+    const docRef = doc(db, "users", uid);
+    async function getUserData() {
+      const docSnap = await getDoc(docRef);
+      let data;
+      let favPosts: Set<string>;
+      if (docSnap.exists()) {
+        data = docSnap.data();
+        favPosts = new Set(data.favoritePosts);
+        favPosts && setFavoritePosts(favPosts);
+      }
+    }
+    getUserData();
+  }, [uid]);
+
+  useEffect(() => {
+    if (!uid) return;
+    // if the user didn't start to add any items to the fav list return;
+    // this will prevent db to get rewrote with an empty array when there are still items in db
+    if (!committedPostAction) return;
+
+    const docRef = doc(db, "users", uid);
+
+    async function dbAddPostsToFavorite() {
+      await updateDoc(docRef, {
+        favoritePosts: [...favoritePosts],
+      });
+    }
+    dbAddPostsToFavorite();
+  }, [favoritePosts]);
 
   useEffect(() => {
     if (!category) return;
@@ -232,11 +271,11 @@ const PostsSection = ({ favoritePosts, setFavoritePosts }: Props) => {
     }
     getNumberOfPosts();
   }, [category]);
-
+  //posts
   const postElements = posts.map((postData: PostData) => {
     postData.isFavorite = false;
     const postId: string = postData["_id"];
-    if (!userIsLogged) {
+    if (!uid) {
       postData.isFavorite = false;
     }
     if (favoritePosts.has(postId)) {
@@ -249,7 +288,8 @@ const PostsSection = ({ favoritePosts, setFavoritePosts }: Props) => {
         postData={postData}
         favoritePosts={favoritePosts}
         setFavoritePosts={setFavoritePosts}
-        userIsLogged={userIsLogged}
+        uid={uid}
+        setCommittedPostAction={setCommittedPostAction}
       />
     );
   });

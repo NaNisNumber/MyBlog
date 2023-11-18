@@ -81,14 +81,14 @@ const Navbar = ({ favoritePosts }: Props) => {
 
   return (
     <Fragment>
-      <button className="absolute" onClick={openNavbar}>
+      <button className="sticky top-6 ml-5 mt-3 md:hidden" onClick={openNavbar}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth="1.5"
           stroke="white"
-          className="w-6 h-6 ml-5 mt-3 md:hidden"
+          className="w-6 h-6 "
         >
           <path
             strokeLinecap="round"

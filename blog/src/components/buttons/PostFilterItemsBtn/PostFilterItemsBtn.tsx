@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
 interface Props {
-  resetPage(category: string): void;
-  category: string;
+  resetPage(category: string | undefined): void;
+  category: string | undefined;
   criterionName: string;
   dataCategory: string;
   tracerOldValue: number;
   tracerNewValue: number;
+  searchbarQueryValueExist: boolean;
 }
 
 const PostFilterItemsBtn = ({
@@ -15,7 +16,16 @@ const PostFilterItemsBtn = ({
   category,
   tracerOldValue,
   tracerNewValue,
+  searchbarQueryValueExist,
 }: Props) => {
+  function applyInitialBtnStyles(btns: NodeListOf<Element>) {
+    for (let i = 0; i < btns.length; i++) {
+      const btn = btns[i];
+      btn.classList.remove("bg-darkPurple", "text-white");
+      btn.classList.add("bg-gold", "text-darkPurple");
+    }
+  }
+
   function applyCurrentBtnStyle(
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) {
@@ -24,11 +34,7 @@ const PostFilterItemsBtn = ({
     //select all category btns
     const btns = document.querySelectorAll(".category__btn");
     //first remove the current styles from all btns and add back the initial styles;
-    for (let i = 0; i < btns.length; i++) {
-      const btn = btns[i];
-      btn.classList.remove("bg-darkPurple", "text-white");
-      btn.classList.add("bg-gold", "text-darkPurple");
-    }
+    applyInitialBtnStyles(btns);
     //delete initial style from currentBtn
     currentBtn.classList.remove("bg-gold", "text-darkPurple");
     //add the current style for the currentBtn
@@ -55,6 +61,13 @@ const PostFilterItemsBtn = ({
       resetPage(definedCategory);
     }
   }
+
+  useEffect(() => {
+    if (searchbarQueryValueExist) {
+      const btns = document.querySelectorAll(".category__btn");
+      applyInitialBtnStyles(btns);
+    }
+  }, [searchbarQueryValueExist]);
 
   return (
     <React.Fragment>

@@ -3,17 +3,17 @@ import PostFilterItemsBtn from "../buttons/PostFilterItemsBtn/PostFilterItemsBtn
 import { createClient } from "@sanity/client";
 import { ReactElement } from "react";
 interface Props {
-  resetPage(category: string): void;
+  resetPage(category: string | undefined): void;
   setFrom: React.Dispatch<React.SetStateAction<number>>;
   setTo: React.Dispatch<React.SetStateAction<number>>;
   postRequestLimit: number;
   setCurrentPageId: React.Dispatch<React.SetStateAction<number>>;
   setPageDirection: React.Dispatch<React.SetStateAction<string>>;
   setReachedEnd: React.Dispatch<React.SetStateAction<boolean>>;
-  category: string;
-  setCategory: React.Dispatch<React.SetStateAction<string>>;
+  category: string | undefined;
   isDragging: boolean;
   setIsDragging: React.Dispatch<React.SetStateAction<boolean>>;
+  searchbarQueryValueExist: boolean;
 }
 interface categories {
   title: string;
@@ -24,6 +24,7 @@ const TabsSelection = ({
   isDragging,
   setIsDragging,
   category,
+  searchbarQueryValueExist,
 }: Props) => {
   const [categories, setCategories] = useState<categories[]>([]);
   const [tracerOldValue, setTracerOldValue] = useState<number>(0);
@@ -66,6 +67,7 @@ const TabsSelection = ({
           criterionName={criterionName}
           tracerOldValue={tracerOldValue}
           tracerNewValue={tracerNewValue}
+          searchbarQueryValueExist={searchbarQueryValueExist}
         />
       );
     }

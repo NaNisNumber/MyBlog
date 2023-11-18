@@ -3,7 +3,7 @@ import libraryImg from "../../images/library.png";
 
 const HeroSection = () => {
   return (
-    <section className="flow-root pt-9 md:pt-0 px-5 pb-9 lg:px-8">
+    <section className="flow-root  md:pt-0 px-6 pb-9 lg:px-8">
       <header className="flex items-center flex-col translate-y-2/3  relative z-30 ">
         <h1 className="text-white font-serif text-2xl font-bold sm:text-5xl lg:text-5xl">
           Welcome to my blog

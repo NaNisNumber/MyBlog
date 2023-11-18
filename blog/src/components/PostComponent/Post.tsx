@@ -1,8 +1,5 @@
-// import { useState } from "react";
 import Rectangle from "../../images/rectangle.png";
 import { Link } from "react-router-dom";
-// import { getFirestore } from "firebase/firestore";
-// import { app } from "../../../firebaseConfig";
 
 interface Props {
   postData: {
@@ -22,23 +19,25 @@ interface Props {
 }
 
 const Post = (props: Props) => {
-  const favoritePosts = props.favoritePosts;
-  const uid = props.uid;
+  const favoritePosts: Set<string> = props.favoritePosts;
+  const uid: string | undefined = props.uid;
   const setFavoritePosts: React.Dispatch<React.SetStateAction<Set<string>>> =
     props.setFavoritePosts;
-  const authorImg = props.postData.authorImg;
-  const authorName = props.postData.authorName;
-  const postImage = props.postData.postImage;
-  const title = props.postData.title;
-  const createdAt = props.postData._createdAt;
+  const authorImg: string = props.postData.authorImg;
+  const authorName: string = props.postData.authorName;
+  const postImage: string = props.postData.postImage;
+  const title: string = props.postData.title;
+  const createdAt: string = props.postData._createdAt;
   const isFavorite: boolean = props.postData.isFavorite;
-  const date = new Date(createdAt);
-  const postId = props.postData._id;
-  const day = date.getDate();
-  const month = date.toLocaleString("en-US", { month: "short" });
-  const year = date.getFullYear();
-  const fullDate = `${day} ${month} ${year}`;
-  const setCommittedPostAction = props.setCommittedPostAction;
+  const date: Date = new Date(createdAt);
+  const postId: string = props.postData._id;
+  const day: number = date.getDate();
+  const month: string = date.toLocaleString("en-US", { month: "short" });
+  const year: number = date.getFullYear();
+  const fullDate: string = `${day} ${month} ${year}`;
+  const setCommittedPostAction:
+    | React.Dispatch<React.SetStateAction<boolean>>
+    | undefined = props.setCommittedPostAction;
 
   function displayPostEyeHandler(e: React.MouseEvent<HTMLDivElement>) {
     const target: HTMLElement = e.currentTarget as HTMLElement;
@@ -125,7 +124,9 @@ const Post = (props: Props) => {
             className="bg-white w-full h-40 md:h-52  relative py-2 cursor-pointer"
             style={{
               backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.3)), url(${postImage})`,
-              backgroundPosition: "35% 35%",
+              backgroundPosition: "center",
+              backgroundSize: "cover",
+              backgroundRepeat: "no-repeat",
             }}
           >
             <img className="absolute right-0 bottom-0" src={Rectangle} />

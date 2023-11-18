@@ -1,6 +1,6 @@
 interface Props {
-  resetPage(category: string): void;
-  category: string;
+  resetPage(category: string | undefined): void;
+  category: string | undefined;
   orderType: string;
   setOrderType: React.Dispatch<React.SetStateAction<string>>;
 }

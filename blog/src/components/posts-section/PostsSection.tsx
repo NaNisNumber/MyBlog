@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useState, useEffect } from "react";
 import { createClient } from "@sanity/client";
 import Pagination from "../pagination/Pagination";
@@ -23,10 +23,15 @@ interface PostData {
   _id: string;
   isFavorite: boolean;
 }
+
+interface TimerRef {
+  current: NodeJS.Timeout | undefined;
+}
+
 const PostsSection = ({ favoritePosts, setFavoritePosts }: Props) => {
   const postRequestLimit: number = 3;
   const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [category, setCategory] = useState<string>("");
+  const [category, setCategory] = useState<string | undefined>("");
   const [posts, setPosts] = useState([]);
   const [from, setFrom] = useState<number>(0);
   const [to, setTo] = useState<number>(postRequestLimit);
@@ -35,8 +40,11 @@ const PostsSection = ({ favoritePosts, setFavoritePosts }: Props) => {
   const [pageDirection, setPageDirection] = useState<string>("");
   const [orderType, setOrderType] = useState<string>(`desc`);
   const [uid, setUid] = useState<string | undefined>("");
-  const [numberOfPosts, setNumberOfPosts] = useState<number>(0);
+  const [numberOfPosts, setNumberOfPosts] = useState<number | string>(0);
+  const [searchbarQuery, setSearchbarQuery] = useState<string>("");
   const [committedPostAction, setCommittedPostAction] =
+    useState<boolean>(false);
+  const [searchbarQueryValueExist, setSearchbarQueryValueExist] =
     useState<boolean>(false);
   const db = getFirestore(app);
   const client = createClient({
@@ -47,10 +55,10 @@ const PostsSection = ({ favoritePosts, setFavoritePosts }: Props) => {
     // token: process.env.SANITY_SECRET_TOKEN // Only if you want to update content with the client
   });
 
-  // uses GROQ to query content: https://www.sanity.io/docs/groq
+  const timerRef: TimerRef = useRef();
 
   // query for posts based on category
-  function resetPage(category: string) {
+  function resetPage(category: string | undefined = undefined) {
     setCategory(category);
     setFrom(0);
     setTo(postRequestLimit);
@@ -74,6 +82,57 @@ const PostsSection = ({ favoritePosts, setFavoritePosts }: Props) => {
       }
     });
   }, []);
+
+  async function getPostsBasedOnQuery() {
+    const posts = await client.fetch(
+      `*[_type == 'post' && title match '${searchbarQuery}' || body[0].children[0].text match '${searchbarQuery}']| order(_createdAt ${orderType})[${from}...${to}]` +
+        `{
+    'authorImg': author->image.asset->.url,
+    'authorName': author->name,
+    'textBlock': body[0].children[0].text,
+    title,
+    'postImage':mainImage.asset->.url,
+    _createdAt,
+    _id
+  }`
+    );
+
+    return posts;
+  }
+
+  async function getPosts() {
+    const posts = await client.fetch(
+      `*[_type == 'post']| order(_createdAt ${orderType})[${from}...${to}]` +
+        `{
+    'authorImg': author->image.asset->.url,
+    'authorName': author->name,
+    'textBlock': body[0].children[0].text,
+    title,
+    'postImage':mainImage.asset->.url,
+    _createdAt,
+    _id
+  }`
+    );
+
+    return posts;
+  }
+
+  async function getPostsByCategory() {
+    const posts = await client.fetch(
+      `*[_type == 'post' && references('${category}')] | order(_createdAt ${orderType})[${from}...${to}]` +
+        `{
+    'authorImg': author->image.asset->.url,
+    'authorName': author->name,
+    'textBlock': body[0].children[0].text,
+    title,
+    'postImage':mainImage.asset->.url,
+    _createdAt,
+    _id
+  }`
+    );
+
+    return posts;
+  }
 
   useEffect(() => {
     // request to db for user fav posts, first time when page loads or on refresh
@@ -108,52 +167,49 @@ const PostsSection = ({ favoritePosts, setFavoritePosts }: Props) => {
     dbAddPostsToFavorite();
   }, [favoritePosts]);
 
+  // request for post data if there is a query
+
+  useEffect(() => {
+    if (!searchbarQuery) {
+      setSearchbarQueryValueExist(false);
+      return;
+    }
+    setNumberOfPosts("unknown");
+    clearTimeout(timerRef.current);
+
+    timerRef.current = setTimeout(() => {
+      timerRef.current = undefined; // Reset timerRef when timer finally ends
+
+      // when this request is made the value of from should be always 0 and to always initial;
+      getPostsBasedOnQuery().then((posts) => {
+        setPosts(posts);
+        setSearchbarQueryValueExist(true);
+      });
+    }, 600);
+
+    return () => clearTimeout(timerRef.current);
+  }, [searchbarQuery]);
+
+  // request for post data if there is a category selected
+
   useEffect(() => {
     if (!category) return;
-    async function getPosts() {
-      const posts = await client.fetch(
-        `*[_type == 'post' && references('${category}')] | order(_createdAt ${orderType})` +
-          `{
-    'authorImg': author->image.asset->.url,
-    'authorName': author->name,
-    'textBlock': body[0].children[0].text,
-    title,
-    'postImage':mainImage.asset->.url,
-    _createdAt,
-    _id
-  }[0...${postRequestLimit}]`
-      );
-      return posts;
-    }
+    setSearchbarQuery("");
 
-    getPosts().then((posts) => {
+    getPostsByCategory().then((posts) => {
       setPosts(posts);
     });
   }, [category]);
 
-  useEffect(() => {
-    if (category) return;
+  // request for post data if there is NOT a category selected
 
-    async function getPosts() {
-      const initialPosts = await client.fetch(
-        `*[_type == 'post'] | order(_createdAt ${orderType})` +
-          `{
-    'authorImg': author->image.asset->.url,
-    'authorName': author->name,
-    'textBlock': body[0].children[0].text,
-    title,
-    'postImage':mainImage.asset->.url,
-    _createdAt,
-    _id
-  }[0...${postRequestLimit}]`
-      );
-      return initialPosts;
-    }
+  useEffect(() => {
+    if (category || category === undefined || searchbarQuery) return;
 
     getPosts().then((initialPosts) => {
       setPosts(initialPosts);
     });
-  }, [category]);
+  }, [category, searchbarQuery]);
 
   async function fetchPageHandler(page: string) {
     setPageDirection(page);
@@ -191,6 +247,7 @@ const PostsSection = ({ favoritePosts, setFavoritePosts }: Props) => {
       }
     }
   }
+  // request posts when page change
 
   useEffect(() => {
     function verifyAndSet(posts: []) {
@@ -201,49 +258,25 @@ const PostsSection = ({ favoritePosts, setFavoritePosts }: Props) => {
         setReachedEnd(true);
         return;
       }
+
       setPosts(posts);
     }
 
-    async function getPosts() {
-      const posts = await client.fetch(
-        `*[_type == 'post']| order(_createdAt ${orderType})[${from}...${to}]` +
-          `{
-    'authorImg': author->image.asset->.url,
-    'authorName': author->name,
-    'textBlock': body[0].children[0].text,
-    title,
-    'postImage':mainImage.asset->.url,
-    _createdAt,
-    _id
-  }`
-      );
-
-      return posts;
+    // if a query is made and page number didn't change and the result === [] display the search result as an [];
+    // if you are making a new query and you are on page 3 then reset the page to initial;
+    if (searchbarQuery) {
+      getPostsBasedOnQuery().then((posts) => {
+        verifyAndSet(posts);
+      });
     }
 
-    async function getPostsByCategory() {
-      const posts = await client.fetch(
-        `*[_type == 'post' && references('${category}')] | order(_createdAt ${orderType})[${from}...${to}]` +
-          `{
-    'authorImg': author->image.asset->.url,
-    'authorName': author->name,
-    'textBlock': body[0].children[0].text,
-    title,
-    'postImage':mainImage.asset->.url,
-    _createdAt,
-    _id
-  }`
-      );
-
-      return posts;
-    }
-    if (!category) {
+    if (!category && !searchbarQuery) {
       getPosts().then((posts) => {
         verifyAndSet(posts);
       });
     }
 
-    if (category) {
+    if (category && !searchbarQuery) {
       getPostsByCategory().then((posts) => {
         verifyAndSet(posts);
       });
@@ -252,17 +285,21 @@ const PostsSection = ({ favoritePosts, setFavoritePosts }: Props) => {
 
   // get total number of posts
   useEffect(() => {
-    if (category) return;
+    if (category || searchbarQuery) return;
+
     async function getNumberOfPosts() {
       const numberOfPosts = await client.fetch(`count(*[_type == 'post']) `);
       setNumberOfPosts(numberOfPosts);
     }
     getNumberOfPosts();
-  }, [category]);
+  }, [category, searchbarQuery]);
 
   // get number of posts in that category
   useEffect(() => {
-    if (!category) return;
+    if (!category) {
+      return;
+    }
+
     async function getNumberOfPosts() {
       const numberOfPosts = await client.fetch(
         `count(*[_type == 'post' && references('${category}')]) `
@@ -271,6 +308,7 @@ const PostsSection = ({ favoritePosts, setFavoritePosts }: Props) => {
     }
     getNumberOfPosts();
   }, [category]);
+
   //posts
   const postElements = posts.map((postData: PostData) => {
     postData.isFavorite = false;
@@ -303,7 +341,11 @@ const PostsSection = ({ favoritePosts, setFavoritePosts }: Props) => {
         className="px-5 pb-9 md:py-5 lg:px-8"
       >
         <div className="flex flex-col gap-4 items-center sm:max-w-[80%] md:max-w-[50%] m-auto overflow-hidden mb-6">
-          <Searchbar />
+          <Searchbar
+            resetPage={resetPage}
+            searchbarQuery={searchbarQuery}
+            setSearchbarQuery={setSearchbarQuery}
+          />
           <TabsSelection
             resetPage={resetPage}
             setFrom={setFrom}
@@ -313,9 +355,9 @@ const PostsSection = ({ favoritePosts, setFavoritePosts }: Props) => {
             setPageDirection={setPageDirection}
             setReachedEnd={setReachedEnd}
             category={category}
-            setCategory={setCategory}
             isDragging={isDragging}
             setIsDragging={setIsDragging}
+            searchbarQueryValueExist={searchbarQueryValueExist}
           />
           <SelectFromDate
             resetPage={resetPage}

@@ -1,7 +1,7 @@
 interface Props {
   fetchPageHandler(page: string): void;
   currentPageId: string | number;
-  numberOfPosts: number;
+  numberOfPosts: number | string;
 }
 
 const Pagination = ({
